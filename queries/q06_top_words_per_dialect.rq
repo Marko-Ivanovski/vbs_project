@@ -1,0 +1,17 @@
+# Q6: Кои се најфреквентните зборови по дијалект?
+# Top-10 words for each dialect (requires subquery).
+
+PREFIX vez: <https://w3id.org/vezilka/ontology#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT ?dialectLabel ?word ?frequency
+WHERE {
+    ?lex a vez:Лексема ;
+         vez:wordForm ?word ;
+         vez:frequency ?frequency ;
+         vez:appearsInDialect ?dialect .
+    ?dialect skos:prefLabel ?dialectLabel .
+    FILTER(LANG(?dialectLabel) = "mk")
+}
+ORDER BY ?dialectLabel DESC(?frequency)
+LIMIT 120

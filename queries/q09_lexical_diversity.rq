@@ -1,0 +1,18 @@
+# Q9: Кое наречје има најголема лексичка разновидност?
+# Lexical diversity per dialect area (narechje).
+
+PREFIX vez: <https://w3id.org/vezilka/ontology#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT ?narechjeLabel (COUNT(DISTINCT ?lex) AS ?uniqueLexemes)
+WHERE {
+    ?lex a vez:Лексема ;
+         vez:appearsInDialect ?dialect .
+    ?dialect skos:broader ?grupa .
+    ?grupa skos:broader ?narechje .
+    ?narechje a vez:Наречје ;
+              skos:prefLabel ?narechjeLabel .
+    FILTER(LANG(?narechjeLabel) = "mk")
+}
+GROUP BY ?narechjeLabel
+ORDER BY DESC(?uniqueLexemes)

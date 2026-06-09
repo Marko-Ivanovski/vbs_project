@@ -1,0 +1,17 @@
+# Q1: Кои зборови се карактеристични за одреден дијалект?
+# Which words are characteristic of a specific dialect?
+# Returns top-20 most frequent words for the given dialect.
+
+PREFIX vez: <https://w3id.org/vezilka/ontology#>
+PREFIX vezr: <https://w3id.org/vezilka/resource/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT ?word ?frequency
+WHERE {
+    ?lex a vez:Лексема ;
+         vez:wordForm ?word ;
+         vez:frequency ?frequency ;
+         vez:appearsInDialect vezr:bitolski .
+}
+ORDER BY DESC(?frequency)
+LIMIT 20

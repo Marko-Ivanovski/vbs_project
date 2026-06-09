@@ -1,0 +1,594 @@
+@prefix vez:     <https://w3id.org/vezilka/ontology#> .
+@prefix vezr:    <https://w3id.org/vezilka/resource/> .
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix prov:    <http://www.w3.org/ns/prov#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix sh:      <http://www.w3.org/ns/shacl#> .
+
+# =============================================================
+# Ontology metadata
+# =============================================================
+
+vez: a owl:Ontology ;
+    dcterms:title "Vezilka Dialect Lexicon Ontology"@en ;
+    dcterms:title "Онтологија за дијалектниот лексикон Везилка"@mk ;
+    dcterms:description "Ontology for representing Macedonian dialect vocabulary, phrases, and linguistic variation across the dialect hierarchy, extracted from transcribed speech data."@en ;
+    dcterms:description "Онтологија за претставување на македонскиот дијалектен вокабулар, фрази и лингвистичка варијација низ дијалектната хиерархија, извлечени од транскрибирани говорни податоци."@mk ;
+    dcterms:language "mk" ;
+    dcterms:creator "Vezilka Project" ;
+    owl:versionInfo "1.0.0" .
+
+# =============================================================
+# Classes — Dialect Hierarchy
+# =============================================================
+
+vez:Наречје a owl:Class ;
+    rdfs:subClassOf skos:Concept ;
+    rdfs:label "Наречје"@mk ;
+    rdfs:label "Dialect Area"@en ;
+    rdfs:comment "Врвно ниво во македонската дијалектна хиерархија. Четири наречја: источно, западно, северно, јужно."@mk ;
+    rdfs:comment "Top level of the Macedonian dialect hierarchy. Four areas: eastern, western, northern, southern."@en .
+
+vez:ДијалектнаГрупа a owl:Class ;
+    rdfs:subClassOf skos:Concept ;
+    rdfs:label "Дијалектна група"@mk ;
+    rdfs:label "Dialect Group"@en ;
+    rdfs:comment "Средно ниво во дијалектната хиерархија — подгрупа на наречје."@mk ;
+    rdfs:comment "Intermediate level in the dialect hierarchy — subgroup within a dialect area."@en .
+
+vez:Дијалект a owl:Class ;
+    rdfs:subClassOf skos:Concept ;
+    rdfs:label "Дијалект"@mk ;
+    rdfs:label "Dialect"@en ;
+    rdfs:comment "Конкретен дијалект (пр. скопски, битолски). Основна единица за класификација на лексика."@mk ;
+    rdfs:comment "Specific dialect (e.g. skopski, bitolski). Primary unit for lexical classification."@en .
+
+# =============================================================
+# Classes — Linguistic Content (core)
+# =============================================================
+
+vez:ТекстуаленСегмент a owl:Class ;
+    rdfs:label "Текстуален сегмент"@mk ;
+    rdfs:label "Text Segment"@en ;
+    rdfs:comment "Транскрибиран текст од еден аудио сегмент (~30s). Атомска единица од корпусот."@mk ;
+    rdfs:comment "Transcribed text from one audio segment (~30s). Atomic unit from the corpus."@en .
+
+vez:Реченица a owl:Class ;
+    rdfs:label "Реченица"@mk ;
+    rdfs:label "Sentence"@en ;
+    rdfs:comment "Реченица извлечена од текстуален сегмент."@mk ;
+    rdfs:comment "Sentence extracted from a text segment."@en .
+
+vez:Лексема a owl:Class ;
+    rdfs:label "Лексема"@mk ;
+    rdfs:label "Lexeme"@en ;
+    rdfs:comment "Канонска форма на збор. Примарна единица за дијалектна анализа — поврзана со дијалектите во кои е потврдена."@mk ;
+    rdfs:comment "Canonical word form. Primary unit for dialect analysis — linked to dialects where attested."@en .
+
+vez:Фраза a owl:Class ;
+    rdfs:label "Фраза"@mk ;
+    rdfs:label "Phrase"@en ;
+    rdfs:comment "Повеќезборен израз или колокација карактеристична за дијалект."@mk ;
+    rdfs:comment "Multi-word expression or collocation characteristic of a dialect."@en .
+
+[] a owl:AllDisjointClasses ;
+    owl:members ( vez:Лексема vez:Фраза ) .
+
+# =============================================================
+# Classes — Entities (from NER)
+# =============================================================
+
+vez:Место a owl:Class ;
+    rdfs:label "Место"@mk ;
+    rdfs:label "Place"@en ;
+    rdfs:comment "Географска локација спомената во текст или поврзана со дијалект."@mk ;
+    rdfs:comment "Geographic location mentioned in text or associated with a dialect."@en .
+
+vez:Лице a owl:Class ;
+    rdfs:label "Лице"@mk ;
+    rdfs:label "Person"@en ;
+    rdfs:comment "Лице споменато во транскриптите."@mk ;
+    rdfs:comment "Person mentioned in transcripts."@en .
+
+[] a owl:AllDisjointClasses ;
+    owl:members ( vez:Место vez:Лице ) .
+
+# =============================================================
+# Classes — Classification
+# =============================================================
+
+vez:Тема a owl:Class ;
+    rdfs:subClassOf skos:Concept ;
+    rdfs:label "Тема"@mk ;
+    rdfs:label "Topic"@en ;
+    rdfs:comment "Тематска класификација на текстуален сегмент."@mk ;
+    rdfs:comment "Topic classification for a text segment."@en .
+
+vez:Извор a owl:Class ;
+    rdfs:label "Извор"@mk ;
+    rdfs:label "Source"@en ;
+    rdfs:comment "Минимална референца кон оригиналното снимање (наслов, дијалект). Не управува со аудио/видео."@mk ;
+    rdfs:comment "Minimal reference to the original recording (title, dialect). No audio/video management."@en .
+
+# =============================================================
+# Object Properties — Dialect hierarchy
+# =============================================================
+
+vez:hasGroup a owl:ObjectProperty ;
+    rdfs:label "has group"@en ;
+    rdfs:label "има група"@mk ;
+    rdfs:domain vez:Наречје ;
+    rdfs:range vez:ДијалектнаГрупа .
+
+vez:hasDialect a owl:ObjectProperty ;
+    rdfs:label "has dialect"@en ;
+    rdfs:label "има дијалект"@mk ;
+    rdfs:domain vez:ДијалектнаГрупа ;
+    rdfs:range vez:Дијалект .
+
+# =============================================================
+# Object Properties — Content structure
+# =============================================================
+
+vez:fromSource a owl:ObjectProperty ;
+    rdfs:label "from source"@en ;
+    rdfs:label "од извор"@mk ;
+    rdfs:domain vez:ТекстуаленСегмент ;
+    rdfs:range vez:Извор .
+
+vez:inDialect a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:label "in dialect"@en ;
+    rdfs:label "на дијалект"@mk ;
+    rdfs:comment "Each text segment belongs to exactly one dialect."@en ;
+    rdfs:domain vez:ТекстуаленСегмент ;
+    rdfs:range vez:Дијалект .
+
+vez:containsSentence a owl:ObjectProperty ;
+    rdfs:label "contains sentence"@en ;
+    rdfs:label "содржи реченица"@mk ;
+    rdfs:domain vez:ТекстуаленСегмент ;
+    rdfs:range vez:Реченица ;
+    owl:inverseOf vez:sentenceOf .
+
+vez:sentenceOf a owl:ObjectProperty ;
+    rdfs:label "sentence of"@en ;
+    rdfs:label "реченица од"@mk ;
+    rdfs:domain vez:Реченица ;
+    rdfs:range vez:ТекстуаленСегмент .
+
+vez:containsLexeme a owl:ObjectProperty ;
+    rdfs:label "contains lexeme"@en ;
+    rdfs:label "содржи лексема"@mk ;
+    rdfs:domain vez:Реченица ;
+    rdfs:range vez:Лексема ;
+    owl:inverseOf vez:lexemeIn .
+
+vez:lexemeIn a owl:ObjectProperty ;
+    rdfs:label "lexeme in"@en ;
+    rdfs:label "лексема во"@mk ;
+    rdfs:domain vez:Лексема ;
+    rdfs:range vez:Реченица .
+
+vez:containsPhrase a owl:ObjectProperty ;
+    rdfs:label "contains phrase"@en ;
+    rdfs:label "содржи фраза"@mk ;
+    rdfs:domain vez:Реченица ;
+    rdfs:range vez:Фраза .
+
+# =============================================================
+# Object Properties — Dialect-linguistic links
+# =============================================================
+
+vez:appearsInDialect a owl:ObjectProperty ;
+    rdfs:label "appears in dialect"@en ;
+    rdfs:label "се јавува во дијалект"@mk ;
+    rdfs:comment "Links a lexeme to each dialect where it is attested in the corpus."@en ;
+    rdfs:domain vez:Лексема ;
+    rdfs:range vez:Дијалект .
+
+vez:hasVariant a owl:ObjectProperty , owl:SymmetricProperty ;
+    rdfs:label "has variant"@en ;
+    rdfs:label "има варијанта"@mk ;
+    rdfs:comment "Cross-dialect variant pair. If word A hasVariant B, then B hasVariant A."@en ;
+    rdfs:domain vez:Лексема ;
+    rdfs:range vez:Лексема .
+
+vez:phraseInDialect a owl:ObjectProperty ;
+    rdfs:label "phrase in dialect"@en ;
+    rdfs:label "фраза во дијалект"@mk ;
+    rdfs:domain vez:Фраза ;
+    rdfs:range vez:Дијалект .
+
+# =============================================================
+# Object Properties — Entity links
+# =============================================================
+
+vez:mentionsPlace a owl:ObjectProperty ;
+    rdfs:label "mentions place"@en ;
+    rdfs:label "споменува место"@mk ;
+    rdfs:domain vez:ТекстуаленСегмент ;
+    rdfs:range vez:Место .
+
+vez:mentionsPerson a owl:ObjectProperty ;
+    rdfs:label "mentions person"@en ;
+    rdfs:label "споменува лице"@mk ;
+    rdfs:domain vez:ТекстуаленСегмент ;
+    rdfs:range vez:Лице .
+
+vez:dialectRegion a owl:ObjectProperty ;
+    rdfs:label "dialect region"@en ;
+    rdfs:label "дијалектен регион"@mk ;
+    rdfs:comment "Geographic area where a dialect is spoken."@en ;
+    rdfs:domain vez:Дијалект ;
+    rdfs:range vez:Место .
+
+# =============================================================
+# Object Properties — Topic & Provenance
+# =============================================================
+
+vez:hasTopic a owl:ObjectProperty ;
+    rdfs:label "has topic"@en ;
+    rdfs:label "има тема"@mk ;
+    rdfs:domain vez:ТекстуаленСегмент ;
+    rdfs:range vez:Тема .
+
+vez:attestedIn a owl:ObjectProperty ;
+    rdfs:label "attested in"@en ;
+    rdfs:label "потврдено во"@mk ;
+    rdfs:comment "Links a lexeme back to the text segment(s) where it was found."@en ;
+    rdfs:domain vez:Лексема ;
+    rdfs:range vez:ТекстуаленСегмент .
+
+# =============================================================
+# Datatype Properties — Text content
+# =============================================================
+
+vez:text a owl:DatatypeProperty ;
+    rdfs:label "text"@en ;
+    rdfs:label "текст"@mk ;
+    rdfs:comment "The actual transcribed text content in Cyrillic."@en ;
+    rdfs:range rdf:langString .
+
+vez:wordForm a owl:DatatypeProperty ;
+    rdfs:label "word form"@en ;
+    rdfs:label "зборовна форма"@mk ;
+    rdfs:comment "Surface form of the word as it appears in the transcript."@en ;
+    rdfs:domain vez:Лексема ;
+    rdfs:range xsd:string .
+
+vez:lemma a owl:DatatypeProperty ;
+    rdfs:label "lemma"@en ;
+    rdfs:label "лема"@mk ;
+    rdfs:comment "Canonical dictionary form of the word."@en ;
+    rdfs:domain vez:Лексема ;
+    rdfs:range xsd:string .
+
+vez:phraseText a owl:DatatypeProperty ;
+    rdfs:label "phrase text"@en ;
+    rdfs:label "текст на фраза"@mk ;
+    rdfs:domain vez:Фраза ;
+    rdfs:range rdf:langString .
+
+# =============================================================
+# Datatype Properties — Statistics
+# =============================================================
+
+vez:frequency a owl:DatatypeProperty ;
+    rdfs:label "frequency"@en ;
+    rdfs:label "фреквенција"@mk ;
+    rdfs:comment "Total occurrence count across the corpus."@en ;
+    rdfs:domain vez:Лексема ;
+    rdfs:range xsd:integer .
+
+vez:segmentIndex a owl:DatatypeProperty ;
+    rdfs:label "segment index"@en ;
+    rdfs:label "индекс на сегмент"@mk ;
+    rdfs:comment "Position of the segment within its source recording."@en ;
+    rdfs:domain vez:ТекстуаленСегмент ;
+    rdfs:range xsd:integer .
+
+# =============================================================
+# Datatype Properties — Metadata
+# =============================================================
+
+vez:sourceTitle a owl:DatatypeProperty ;
+    rdfs:label "source title"@en ;
+    rdfs:label "наслов на извор"@mk ;
+    rdfs:domain vez:Извор ;
+    rdfs:range xsd:string .
+
+vez:govor a owl:DatatypeProperty ;
+    rdfs:label "govor"@en ;
+    rdfs:label "говор"@mk ;
+    rdfs:comment "Raw dialect label from metadata.json govor field."@en ;
+    rdfs:domain vez:Извор ;
+    rdfs:range xsd:string .
+
+vez:languageCode a owl:DatatypeProperty ;
+    rdfs:label "language code"@en ;
+    rdfs:label "јазичен код"@mk ;
+    rdfs:range xsd:string .
+
+vez:personName a owl:DatatypeProperty ;
+    rdfs:label "person name"@en ;
+    rdfs:label "име на лице"@mk ;
+    rdfs:domain vez:Лице ;
+    rdfs:range xsd:string .
+
+vez:placeName a owl:DatatypeProperty ;
+    rdfs:label "place name"@en ;
+    rdfs:label "име на место"@mk ;
+    rdfs:domain vez:Место ;
+    rdfs:range xsd:string .
+
+# =============================================================
+# Instances — Dialect Hierarchy: Наречја
+# =============================================================
+
+vezr:istochno_narechje a vez:Наречје ;
+    skos:prefLabel "Источно наречје"@mk ;
+    skos:prefLabel "Eastern Dialect Area"@en ;
+    vez:hasGroup vezr:istochno_centralna_grupa ,
+                 vezr:istochno_istochna_grupa .
+
+vezr:zapadno_narechje a vez:Наречје ;
+    skos:prefLabel "Западно наречје"@mk ;
+    skos:prefLabel "Western Dialect Area"@en ;
+    vez:hasGroup vezr:zapadno_centralna_grupa ,
+                 vezr:zapadno_zapadna_grupa .
+
+vezr:severno_narechje a vez:Наречје ;
+    skos:prefLabel "Северно наречје"@mk ;
+    skos:prefLabel "Northern Dialect Area"@en ;
+    vez:hasGroup vezr:severno_istochna_grupa ,
+                 vezr:severno_zapadna_grupa .
+
+vezr:juzhno_narechje a vez:Наречје ;
+    skos:prefLabel "Јужно наречје"@mk ;
+    skos:prefLabel "Southern Dialect Area"@en ;
+    vez:hasGroup vezr:juzhno_centralna_grupa ,
+                 vezr:juzhno_juzhna_grupa .
+
+[] a owl:AllDifferent ;
+    owl:distinctMembers (
+        vezr:istochno_narechje
+        vezr:zapadno_narechje
+        vezr:severno_narechje
+        vezr:juzhno_narechje
+    ) .
+
+# =============================================================
+# Instances — Dialect Hierarchy: Групи
+# =============================================================
+
+vezr:istochno_centralna_grupa a vez:ДијалектнаГрупа ;
+    skos:prefLabel "Централна група — источно наречје"@mk ;
+    skos:prefLabel "Central Group — Eastern"@en ;
+    skos:broader vezr:istochno_narechje ;
+    vez:hasDialect vezr:kochanski , vezr:shtipski .
+
+vezr:istochno_istochna_grupa a vez:ДијалектнаГрупа ;
+    skos:prefLabel "Источна група — источно наречје"@mk ;
+    skos:prefLabel "Eastern Group — Eastern"@en ;
+    skos:broader vezr:istochno_narechje ;
+    vez:hasDialect vezr:maleshevski , vezr:strumichki .
+
+vezr:zapadno_centralna_grupa a vez:ДијалектнаГрупа ;
+    skos:prefLabel "Централна група — западно наречје"@mk ;
+    skos:prefLabel "Central Group — Western"@en ;
+    skos:broader vezr:zapadno_narechje ;
+    vez:hasDialect vezr:bitolski , vezr:prilepski , vezr:kichevsko_porechki , vezr:veleshki .
+
+vezr:zapadno_zapadna_grupa a vez:ДијалектнаГрупа ;
+    skos:prefLabel "Западна група — западно наречје"@mk ;
+    skos:prefLabel "Western Group — Western"@en ;
+    skos:broader vezr:zapadno_narechje ;
+    vez:hasDialect vezr:ohridski , vezr:strushki , vezr:debarski , vezr:galichki , vezr:gostivarski , vezr:prespanski .
+
+vezr:severno_istochna_grupa a vez:ДијалектнаГрупа ;
+    skos:prefLabel "Источна група — северно наречје"@mk ;
+    skos:prefLabel "Eastern Group — Northern"@en ;
+    skos:broader vezr:severno_narechje ;
+    vez:hasDialect vezr:kumanovski , vezr:ovchepolski , vezr:kratovski , vezr:krivopalanechki .
+
+vezr:severno_zapadna_grupa a vez:ДијалектнаГрупа ;
+    skos:prefLabel "Западна група — северно наречје"@mk ;
+    skos:prefLabel "Western Group — Northern"@en ;
+    skos:broader vezr:severno_narechje ;
+    vez:hasDialect vezr:skopski , vezr:tetovski .
+
+vezr:juzhno_centralna_grupa a vez:ДијалектнаГрупа ;
+    skos:prefLabel "Централна група — јужно наречје"@mk ;
+    skos:prefLabel "Central Group — Southern"@en ;
+    skos:broader vezr:juzhno_narechje ;
+    vez:hasDialect vezr:kavadarechki , vezr:negotinski .
+
+vezr:juzhno_juzhna_grupa a vez:ДијалектнаГрупа ;
+    skos:prefLabel "Јужна група — јужно наречје"@mk ;
+    skos:prefLabel "Southern Group — Southern"@en ;
+    skos:broader vezr:juzhno_narechje ;
+    vez:hasDialect vezr:gevgeliski , vezr:valandovski .
+
+# =============================================================
+# Instances — Dialect Hierarchy: Дијалекти (12 with data)
+# =============================================================
+
+vezr:skopski a vez:Дијалект ;
+    skos:prefLabel "Скопски"@mk ;
+    skos:prefLabel "Skopski"@en ;
+    skos:broader vezr:severno_zapadna_grupa ;
+    vez:dialectRegion vezr:place_skopje .
+
+vezr:bitolski a vez:Дијалект ;
+    skos:prefLabel "Битолски"@mk ;
+    skos:prefLabel "Bitolski"@en ;
+    skos:broader vezr:zapadno_centralna_grupa ;
+    vez:dialectRegion vezr:place_bitola .
+
+vezr:gevgeliski a vez:Дијалект ;
+    skos:prefLabel "Гевгелиски"@mk ;
+    skos:prefLabel "Gevgeliski"@en ;
+    skos:broader vezr:juzhno_juzhna_grupa ;
+    vez:dialectRegion vezr:place_gevgelija .
+
+vezr:kochanski a vez:Дијалект ;
+    skos:prefLabel "Кочански"@mk ;
+    skos:prefLabel "Kochanski"@en ;
+    skos:broader vezr:istochno_centralna_grupa ;
+    vez:dialectRegion vezr:place_kochani .
+
+vezr:shtipski a vez:Дијалект ;
+    skos:prefLabel "Штипски"@mk ;
+    skos:prefLabel "Shtipski"@en ;
+    skos:broader vezr:istochno_centralna_grupa ;
+    vez:dialectRegion vezr:place_shtip .
+
+vezr:kumanovski a vez:Дијалект ;
+    skos:prefLabel "Кумановски"@mk ;
+    skos:prefLabel "Kumanovski"@en ;
+    skos:broader vezr:severno_istochna_grupa ;
+    vez:dialectRegion vezr:place_kumanovo .
+
+vezr:ovchepolski a vez:Дијалект ;
+    skos:prefLabel "Овчеполски"@mk ;
+    skos:prefLabel "Ovchepolski"@en ;
+    skos:broader vezr:severno_istochna_grupa ;
+    vez:dialectRegion vezr:place_sveti_nikole .
+
+vezr:prilepski a vez:Дијалект ;
+    skos:prefLabel "Прилепски"@mk ;
+    skos:prefLabel "Prilepski"@en ;
+    skos:broader vezr:zapadno_centralna_grupa ;
+    vez:dialectRegion vezr:place_prilep .
+
+vezr:veleshki a vez:Дијалект ;
+    skos:prefLabel "Велешки"@mk ;
+    skos:prefLabel "Veleshki"@en ;
+    skos:broader vezr:zapadno_centralna_grupa ;
+    vez:dialectRegion vezr:place_veles .
+
+vezr:kichevsko_porechki a vez:Дијалект ;
+    skos:prefLabel "Кичевско-поречки"@mk ;
+    skos:prefLabel "Kichevsko-Porechki"@en ;
+    skos:broader vezr:zapadno_centralna_grupa ;
+    vez:dialectRegion vezr:place_kichevo .
+
+vezr:ohridski a vez:Дијалект ;
+    skos:prefLabel "Охридски"@mk ;
+    skos:prefLabel "Ohridski"@en ;
+    skos:broader vezr:zapadno_zapadna_grupa ;
+    vez:dialectRegion vezr:place_ohrid .
+
+vezr:strushki a vez:Дијалект ;
+    skos:prefLabel "Струшки"@mk ;
+    skos:prefLabel "Strushki"@en ;
+    skos:broader vezr:zapadno_zapadna_grupa ;
+    vez:dialectRegion vezr:place_struga .
+
+# =============================================================
+# Instances — Дијалекти without data (10 defined in hierarchy)
+# =============================================================
+
+vezr:maleshevski a vez:Дијалект ;
+    skos:prefLabel "Малешевски"@mk ;
+    skos:broader vezr:istochno_istochna_grupa .
+
+vezr:strumichki a vez:Дијалект ;
+    skos:prefLabel "Струмички"@mk ;
+    skos:broader vezr:istochno_istochna_grupa .
+
+vezr:kratovski a vez:Дијалект ;
+    skos:prefLabel "Кратовски"@mk ;
+    skos:broader vezr:severno_istochna_grupa .
+
+vezr:krivopalanechki a vez:Дијалект ;
+    skos:prefLabel "Кривопаланечки"@mk ;
+    skos:broader vezr:severno_istochna_grupa .
+
+vezr:tetovski a vez:Дијалект ;
+    skos:prefLabel "Тетовски"@mk ;
+    skos:broader vezr:severno_zapadna_grupa .
+
+vezr:debarski a vez:Дијалект ;
+    skos:prefLabel "Дебарски"@mk ;
+    skos:broader vezr:zapadno_zapadna_grupa .
+
+vezr:galichki a vez:Дијалект ;
+    skos:prefLabel "Галички"@mk ;
+    skos:broader vezr:zapadno_zapadna_grupa .
+
+vezr:gostivarski a vez:Дијалект ;
+    skos:prefLabel "Гостиварски"@mk ;
+    skos:broader vezr:zapadno_zapadna_grupa .
+
+vezr:prespanski a vez:Дијалект ;
+    skos:prefLabel "Преспански"@mk ;
+    skos:broader vezr:zapadno_zapadna_grupa .
+
+vezr:kavadarechki a vez:Дијалект ;
+    skos:prefLabel "Кавадаречки"@mk ;
+    skos:broader vezr:juzhno_centralna_grupa .
+
+vezr:negotinski a vez:Дијалект ;
+    skos:prefLabel "Неготински"@mk ;
+    skos:broader vezr:juzhno_centralna_grupa .
+
+vezr:valandovski a vez:Дијалект ;
+    skos:prefLabel "Валандовски"@mk ;
+    skos:broader vezr:juzhno_juzhna_grupa .
+
+# =============================================================
+# Instances — Core dialect region places
+# =============================================================
+
+vezr:place_skopje a vez:Место ;
+    vez:placeName "Скопје" ;
+    rdfs:label "Скопје"@mk .
+
+vezr:place_bitola a vez:Место ;
+    vez:placeName "Битола" ;
+    rdfs:label "Битола"@mk .
+
+vezr:place_gevgelija a vez:Место ;
+    vez:placeName "Гевгелија" ;
+    rdfs:label "Гевгелија"@mk .
+
+vezr:place_kochani a vez:Место ;
+    vez:placeName "Кочани" ;
+    rdfs:label "Кочани"@mk .
+
+vezr:place_shtip a vez:Место ;
+    vez:placeName "Штип" ;
+    rdfs:label "Штип"@mk .
+
+vezr:place_kumanovo a vez:Место ;
+    vez:placeName "Куманово" ;
+    rdfs:label "Куманово"@mk .
+
+vezr:place_sveti_nikole a vez:Место ;
+    vez:placeName "Свети Николе" ;
+    rdfs:label "Свети Николе"@mk .
+
+vezr:place_prilep a vez:Место ;
+    vez:placeName "Прилеп" ;
+    rdfs:label "Прилеп"@mk .
+
+vezr:place_veles a vez:Место ;
+    vez:placeName "Велес" ;
+    rdfs:label "Велес"@mk .
+
+vezr:place_kichevo a vez:Место ;
+    vez:placeName "Кичево" ;
+    rdfs:label "Кичево"@mk .
+
+vezr:place_ohrid a vez:Место ;
+    vez:placeName "Охрид" ;
+    rdfs:label "Охрид"@mk .
+
+vezr:place_struga a vez:Место ;
+    vez:placeName "Струга" ;
+    rdfs:label "Струга"@mk .

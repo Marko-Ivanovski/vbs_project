@@ -1,0 +1,21 @@
+# Q3: Кои зборови имаат варијанти во повеќе дијалекти?
+# Words with cross-dialect variant links.
+
+PREFIX vez: <https://w3id.org/vezilka/ontology#>
+PREFIX vezr: <https://w3id.org/vezilka/resource/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT ?word1 ?dialect1Label ?word2 ?dialect2Label
+WHERE {
+    ?lex1 vez:hasVariant ?lex2 .
+    ?lex1 vez:wordForm ?word1 ;
+          vez:appearsInDialect ?d1 .
+    ?lex2 vez:wordForm ?word2 ;
+          vez:appearsInDialect ?d2 .
+    ?d1 skos:prefLabel ?dialect1Label .
+    ?d2 skos:prefLabel ?dialect2Label .
+    FILTER(LANG(?dialect1Label) = "mk")
+    FILTER(LANG(?dialect2Label) = "mk")
+    FILTER(STR(?lex1) < STR(?lex2))
+}
+LIMIT 30

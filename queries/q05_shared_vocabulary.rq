@@ -1,0 +1,16 @@
+# Q5: Колку зборови се заеднички за сите дијалекти?
+# Words that appear in ALL 12 dialects.
+
+PREFIX vez: <https://w3id.org/vezilka/ontology#>
+
+SELECT ?word ?frequency (COUNT(DISTINCT ?dialect) AS ?dialectCount)
+WHERE {
+    ?lex a vez:Лексема ;
+         vez:wordForm ?word ;
+         vez:frequency ?frequency ;
+         vez:appearsInDialect ?dialect .
+}
+GROUP BY ?lex ?word ?frequency
+HAVING (COUNT(DISTINCT ?dialect) = 12)
+ORDER BY DESC(?frequency)
+LIMIT 20
