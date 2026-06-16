@@ -1,8 +1,8 @@
 # Q2: Како се разликува лексиката меѓу два дијалекта?
 # Words that appear in bitolski but NOT in skopski.
 
-PREFIX vez: <https://w3id.org/vezilka/ontology#>
-PREFIX vezr: <https://w3id.org/vezilka/resource/>
+PREFIX vez: <http://example.org/vezilka/ontology#>
+PREFIX vezr: <http://example.org/vezilka/resource/>
 
 SELECT ?word ?frequency
 WHERE {

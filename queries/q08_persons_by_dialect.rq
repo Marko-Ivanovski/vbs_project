@@ -1,7 +1,7 @@
 # Q8: Кои лица се споменати и во кои дијалекти?
 # People mentioned and in which dialects.
 
-PREFIX vez: <https://w3id.org/vezilka/ontology#>
+PREFIX vez: <http://example.org/vezilka/ontology#>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 
 SELECT ?personName ?dialectLabel (COUNT(?seg) AS ?mentions)

@@ -1,0 +1,15 @@
+# Q10: Кои зборови варираат најмногу низ дијалектите?
+# Lexemes ranked by number of cross-dialect variants (most variable words).
+
+PREFIX vez: <http://example.org/vezilka/ontology#>
+
+SELECT ?word (COUNT(DISTINCT ?variant) AS ?variantCount)
+WHERE {
+    ?lex vez:wordForm ?word .
+    { ?lex vez:hasVariant ?variant . }
+    UNION
+    { ?variant vez:hasVariant ?lex . }
+}
+GROUP BY ?word
+ORDER BY DESC(?variantCount)
+LIMIT 20

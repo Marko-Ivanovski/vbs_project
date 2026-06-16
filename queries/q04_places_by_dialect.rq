@@ -1,8 +1,8 @@
 # Q4: Кои места се споменати во текстовите од даден дијалект?
 # Places mentioned in texts from a specific dialect.
 
-PREFIX vez: <https://w3id.org/vezilka/ontology#>
-PREFIX vezr: <https://w3id.org/vezilka/resource/>
+PREFIX vez: <http://example.org/vezilka/ontology#>
+PREFIX vezr: <http://example.org/vezilka/resource/>
 
 SELECT ?placeName (COUNT(?seg) AS ?mentions)
 WHERE {

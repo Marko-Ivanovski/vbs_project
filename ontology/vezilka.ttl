@@ -1,5 +1,5 @@
-@prefix vez:     <https://w3id.org/vezilka/ontology#> .
-@prefix vezr:    <https://w3id.org/vezilka/resource/> .
+@prefix vez:     <http://example.org/vezilka/ontology#> .
+@prefix vezr:    <http://example.org/vezilka/resource/> .
 @prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
 @prefix prov:    <http://www.w3.org/ns/prov#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .

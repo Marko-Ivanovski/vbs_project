@@ -1,8 +1,8 @@
 # Q3: Кои зборови имаат варијанти во повеќе дијалекти?
 # Words with cross-dialect variant links.
 
-PREFIX vez: <https://w3id.org/vezilka/ontology#>
-PREFIX vezr: <https://w3id.org/vezilka/resource/>
+PREFIX vez: <http://example.org/vezilka/ontology#>
+PREFIX vezr: <http://example.org/vezilka/resource/>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 
 SELECT ?word1 ?dialect1Label ?word2 ?dialect2Label

@@ -1,2 +1,4 @@
 rdflib>=7.0
 pyshacl>=0.25
+neo4j>=5.20
+python-dotenv>=1.0

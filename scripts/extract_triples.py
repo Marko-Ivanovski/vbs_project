@@ -21,8 +21,8 @@ from pathlib import Path
 from rdflib import Graph, Literal, Namespace, URIRef
 from rdflib.namespace import OWL, RDF, RDFS, SKOS, XSD
 
-VEZ = Namespace("https://w3id.org/vezilka/ontology#")
-VEZR = Namespace("https://w3id.org/vezilka/resource/")
+VEZ = Namespace("http://example.org/vezilka/ontology#")
+VEZR = Namespace("http://example.org/vezilka/resource/")
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data" / "dijalekti"
 ONTOLOGY_FILE = Path(__file__).resolve().parent.parent / "ontology" / "vezilka.ttl"
@@ -363,6 +363,90 @@ def edit_distance(s1: str, s2: str) -> int:
     return prev[len(s2)]
 
 
+# =============================================================
+# Dialectal variant validation
+#
+# Fuzzy edit-distance alone keeps orthographic false friends (the
+# сон/сом, рак/рок problem). A candidate pair is accepted only if w1
+# aligns to w2 using exclusively *regular* Macedonian cross-dialect
+# sound correspondences. This is fully automatic (no manual review)
+# and trades recall for precision, as intended.
+# =============================================================
+
+# Allowed single-character substitutions (unordered).
+_VARIANT_SUB_PAIRS = {
+    frozenset(("е", "и")),   # eastern vowel reduction (е > и)
+    frozenset(("о", "у")),   # eastern vowel reduction (о > у)
+    frozenset(("а", "ъ")),   # schwa reflex
+    frozenset(("ќ", "ч")),   # palatal variation
+    frozenset(("ѓ", "џ")),
+    frozenset(("ѕ", "з")),
+    frozenset(("х", "в")),   # х-reflex
+    frozenset(("х", "ф")),
+    frozenset(("в", "ф")),
+    frozenset(("л", "в")),   # л-vocalization (волк ~ вовк)
+    frozenset(("њ", "н")),
+    frozenset(("љ", "л")),
+}
+
+# Characters whose insertion/deletion is a regular elision (intervocalic
+# г/в/х/ј loss: сега ~ сеа, човек ~ чоек; final/cluster т: што ~ шо).
+_VARIANT_INDEL_CHARS = set("гвхјт")
+
+
+def _align_ops(s1: str, s2: str) -> list[tuple[str, str, str]]:
+    """Edit-distance alignment with backtrace -> list of (op, c1, c2)."""
+    n, m = len(s1), len(s2)
+    dp = [[0] * (m + 1) for _ in range(n + 1)]
+    for i in range(n + 1):
+        dp[i][0] = i
+    for j in range(m + 1):
+        dp[0][j] = j
+    for i in range(1, n + 1):
+        for j in range(1, m + 1):
+            cost = 0 if s1[i - 1] == s2[j - 1] else 1
+            dp[i][j] = min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + cost)
+
+    ops: list[tuple[str, str, str]] = []
+    i, j = n, m
+    while i > 0 or j > 0:
+        if (
+            i > 0 and j > 0
+            and dp[i][j] == dp[i - 1][j - 1] + (0 if s1[i - 1] == s2[j - 1] else 1)
+        ):
+            op = "match" if s1[i - 1] == s2[j - 1] else "sub"
+            ops.append((op, s1[i - 1], s2[j - 1]))
+            i -= 1
+            j -= 1
+        elif i > 0 and dp[i][j] == dp[i - 1][j] + 1:
+            ops.append(("del", s1[i - 1], ""))
+            i -= 1
+        else:
+            ops.append(("ins", "", s2[j - 1]))
+            j -= 1
+    return ops
+
+
+def is_dialectal_variant(w1: str, w2: str, max_changes: int = 2) -> bool:
+    """True only if w1/w2 differ by regular Macedonian sound correspondences."""
+    if len(w1) < 3 or len(w2) < 3:
+        return False
+    changes = 0
+    for op, c1, c2 in _align_ops(w1, w2):
+        if op == "match":
+            continue
+        changes += 1
+        if changes > max_changes:
+            return False
+        if op == "sub":
+            if frozenset((c1, c2)) not in _VARIANT_SUB_PAIRS:
+                return False
+        else:  # ins / del
+            if (c1 or c2) not in _VARIANT_INDEL_CHARS:
+                return False
+    return changes >= 1
+
+
 def find_variant_candidates(
     dialect_words: dict[str, Counter],
     global_freq: Counter,
@@ -399,7 +483,7 @@ def find_variant_candidates(
                     if pair_key in seen:
                         continue
                     dist = edit_distance(w1, w2)
-                    if 0 < dist <= max_edit_dist:
+                    if 0 < dist <= max_edit_dist and is_dialectal_variant(w1, w2):
                         candidates.append((w1, w2))
                         seen.add(pair_key)
 

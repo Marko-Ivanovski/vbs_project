@@ -1,0 +1,20 @@
+# Q7: Кои дијалекти се најслични според заеднички варијантни зборови?
+# Which dialect pairs share the most variant words (lexical similarity).
+
+PREFIX vez: <http://example.org/vezilka/ontology#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT ?dialectA ?dialectB (COUNT(*) AS ?sharedVariants)
+WHERE {
+    ?lex1 vez:hasVariant ?lex2 .
+    ?lex1 vez:appearsInDialect ?d1 .
+    ?lex2 vez:appearsInDialect ?d2 .
+    ?d1 skos:prefLabel ?dialectA .
+    ?d2 skos:prefLabel ?dialectB .
+    FILTER(LANG(?dialectA) = "mk")
+    FILTER(LANG(?dialectB) = "mk")
+    FILTER(STR(?dialectA) < STR(?dialectB))
+}
+GROUP BY ?dialectA ?dialectB
+ORDER BY DESC(?sharedVariants)
+LIMIT 20

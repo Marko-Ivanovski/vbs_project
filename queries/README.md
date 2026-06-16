@@ -20,10 +20,10 @@ python scripts/extract_triples.py
 | `q04_places_by_dialect.rq` | Кои места се споменати во текстовите од даден дијалект? |
 | `q05_shared_vocabulary.rq` | Колку зборови се заеднички за сите дијалекти? |
 | `q06_top_words_per_dialect.rq` | Кои се најфреквентните зборови по дијалект? |
-| `q07_topics_by_dialect.rq` | Кои теми се застапени по дијалект? (бара topic classification) |
+| `q07_dialect_similarity.rq` | Кои дијалекти се најслични според заеднички варијантни зборови? |
 | `q08_persons_by_dialect.rq` | Кои лица се споменати и во кои дијалекти? |
 | `q09_lexical_diversity.rq` | Кое наречје има најголема лексичка разновидност? |
-| `q10_unique_phrases.rq` | Кои фрази се уникатни за одреден дијалект? (бара phrase extraction) |
+| `q10_most_variable_words.rq` | Кои зборови варираат најмногу низ дијалектите? |
 
 ## Извршување на сите queries
 
@@ -63,6 +63,8 @@ for row in g.query(query):
 
 ## Забелешки
 
-- Q7 и Q10 враќаат празни резултати бидејќи topic classification и phrase extraction се уште не се имплементирани.
+- Q7 (сличност на дијалекти) и Q10 (најваријабилни зборови) се потпираат на `vez:hasVariant`
+  врските, кои се филтрирани на 111 висококвалитетни парови (види `scripts/README.md`).
 - Q06 моментално користи глобална фреквенција, не per-dialect фреквенција.
 - Queries може да се извршат и во Protégé или било кој SPARQL endpoint (Apache Jena Fuseki, GraphDB) со вчитување на `output/vezilka-data.ttl`.
+- Истиот граф е достапен и во **Neo4j Aura** за визуелно истражување — види `scripts/load_neo4j.py`.

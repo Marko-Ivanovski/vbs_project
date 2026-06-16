@@ -1,7 +1,7 @@
 # Q6: Кои се најфреквентните зборови по дијалект?
 # Top-10 words for each dialect (requires subquery).
 
-PREFIX vez: <https://w3id.org/vezilka/ontology#>
+PREFIX vez: <http://example.org/vezilka/ontology#>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 
 SELECT ?dialectLabel ?word ?frequency

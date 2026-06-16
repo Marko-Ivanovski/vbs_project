@@ -4,6 +4,9 @@
 # Generated output (re-creatable by running scripts/)
 output/
 
+# Secrets / credentials
+.env
+
 # Python
 __pycache__/
 *.pyc
