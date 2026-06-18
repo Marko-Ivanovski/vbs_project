@@ -6,63 +6,6 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 
 # =============================================================
-# Shape: ТекстуаленСегмент
-# =============================================================
-
-vez:ТекстуаленСегментShape a sh:NodeShape ;
-    sh:targetClass vez:ТекстуаленСегмент ;
-    sh:property [
-        sh:path vez:text ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:datatype rdf:langString ;
-        sh:name "text content" ;
-    ] ;
-    sh:property [
-        sh:path vez:inDialect ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:class vez:Дијалект ;
-        sh:name "dialect" ;
-    ] ;
-    sh:property [
-        sh:path vez:fromSource ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:class vez:Извор ;
-        sh:name "source" ;
-    ] ;
-    sh:property [
-        sh:path vez:segmentIndex ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:datatype xsd:integer ;
-        sh:minInclusive 0 ;
-        sh:name "segment index" ;
-    ] .
-
-# =============================================================
-# Shape: Реченица
-# =============================================================
-
-vez:РеченицаShape a sh:NodeShape ;
-    sh:targetClass vez:Реченица ;
-    sh:property [
-        sh:path vez:text ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:datatype rdf:langString ;
-        sh:name "sentence text" ;
-    ] ;
-    sh:property [
-        sh:path vez:sentenceOf ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:class vez:ТекстуаленСегмент ;
-        sh:name "parent segment" ;
-    ] .
-
-# =============================================================
 # Shape: Лексема
 # =============================================================
 
@@ -91,47 +34,6 @@ vez:ЛексемаShape a sh:NodeShape ;
     ] .
 
 # =============================================================
-# Shape: Фраза
-# =============================================================
-
-vez:ФразаShape a sh:NodeShape ;
-    sh:targetClass vez:Фраза ;
-    sh:property [
-        sh:path vez:phraseText ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:datatype rdf:langString ;
-        sh:name "phrase text" ;
-    ] ;
-    sh:property [
-        sh:path vez:phraseInDialect ;
-        sh:minCount 1 ;
-        sh:class vez:Дијалект ;
-        sh:name "dialect" ;
-    ] .
-
-# =============================================================
-# Shape: Извор
-# =============================================================
-
-vez:ИзворShape a sh:NodeShape ;
-    sh:targetClass vez:Извор ;
-    sh:property [
-        sh:path vez:sourceTitle ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:datatype xsd:string ;
-        sh:name "source title" ;
-    ] ;
-    sh:property [
-        sh:path vez:govor ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:datatype xsd:string ;
-        sh:name "govor label" ;
-    ] .
-
-# =============================================================
 # Shape: Место
 # =============================================================
 
@@ -143,20 +45,6 @@ vez:МестоShape a sh:NodeShape ;
         sh:maxCount 1 ;
         sh:datatype xsd:string ;
         sh:name "place name" ;
-    ] .
-
-# =============================================================
-# Shape: Лице
-# =============================================================
-
-vez:ЛицеShape a sh:NodeShape ;
-    sh:targetClass vez:Лице ;
-    sh:property [
-        sh:path vez:personName ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:datatype xsd:string ;
-        sh:name "person name" ;
     ] .
 
 # =============================================================

@@ -16,11 +16,11 @@
 vez: a owl:Ontology ;
     dcterms:title "Vezilka Dialect Lexicon Ontology"@en ;
     dcterms:title "Онтологија за дијалектниот лексикон Везилка"@mk ;
-    dcterms:description "Ontology for representing Macedonian dialect vocabulary, phrases, and linguistic variation across the dialect hierarchy, extracted from transcribed speech data."@en ;
-    dcterms:description "Онтологија за претставување на македонскиот дијалектен вокабулар, фрази и лингвистичка варијација низ дијалектната хиерархија, извлечени од транскрибирани говорни податоци."@mk ;
+    dcterms:description "Ontology for representing Macedonian dialect vocabulary and cross-dialect lexical variation across the dialect hierarchy, extracted from transcribed speech data."@en ;
+    dcterms:description "Онтологија за претставување на македонскиот дијалектен вокабулар и меѓудијалектната лексичка варијација низ дијалектната хиерархија, извлечени од транскрибирани говорни податоци."@mk ;
     dcterms:language "mk" ;
     dcterms:creator "Vezilka Project" ;
-    owl:versionInfo "1.0.0" .
+    owl:versionInfo "2.0.0" .
 
 # =============================================================
 # Classes — Dialect Hierarchy
@@ -48,20 +48,8 @@ vez:Дијалект a owl:Class ;
     rdfs:comment "Specific dialect (e.g. skopski, bitolski). Primary unit for lexical classification."@en .
 
 # =============================================================
-# Classes — Linguistic Content (core)
+# Classes — Linguistic Content
 # =============================================================
-
-vez:ТекстуаленСегмент a owl:Class ;
-    rdfs:label "Текстуален сегмент"@mk ;
-    rdfs:label "Text Segment"@en ;
-    rdfs:comment "Транскрибиран текст од еден аудио сегмент (~30s). Атомска единица од корпусот."@mk ;
-    rdfs:comment "Transcribed text from one audio segment (~30s). Atomic unit from the corpus."@en .
-
-vez:Реченица a owl:Class ;
-    rdfs:label "Реченица"@mk ;
-    rdfs:label "Sentence"@en ;
-    rdfs:comment "Реченица извлечена од текстуален сегмент."@mk ;
-    rdfs:comment "Sentence extracted from a text segment."@en .
 
 vez:Лексема a owl:Class ;
     rdfs:label "Лексема"@mk ;
@@ -69,50 +57,15 @@ vez:Лексема a owl:Class ;
     rdfs:comment "Канонска форма на збор. Примарна единица за дијалектна анализа — поврзана со дијалектите во кои е потврдена."@mk ;
     rdfs:comment "Canonical word form. Primary unit for dialect analysis — linked to dialects where attested."@en .
 
-vez:Фраза a owl:Class ;
-    rdfs:label "Фраза"@mk ;
-    rdfs:label "Phrase"@en ;
-    rdfs:comment "Повеќезборен израз или колокација карактеристична за дијалект."@mk ;
-    rdfs:comment "Multi-word expression or collocation characteristic of a dialect."@en .
-
-[] a owl:AllDisjointClasses ;
-    owl:members ( vez:Лексема vez:Фраза ) .
-
 # =============================================================
-# Classes — Entities (from NER)
+# Classes — Places (dialect regions)
 # =============================================================
 
 vez:Место a owl:Class ;
     rdfs:label "Место"@mk ;
     rdfs:label "Place"@en ;
-    rdfs:comment "Географска локација спомената во текст или поврзана со дијалект."@mk ;
-    rdfs:comment "Geographic location mentioned in text or associated with a dialect."@en .
-
-vez:Лице a owl:Class ;
-    rdfs:label "Лице"@mk ;
-    rdfs:label "Person"@en ;
-    rdfs:comment "Лице споменато во транскриптите."@mk ;
-    rdfs:comment "Person mentioned in transcripts."@en .
-
-[] a owl:AllDisjointClasses ;
-    owl:members ( vez:Место vez:Лице ) .
-
-# =============================================================
-# Classes — Classification
-# =============================================================
-
-vez:Тема a owl:Class ;
-    rdfs:subClassOf skos:Concept ;
-    rdfs:label "Тема"@mk ;
-    rdfs:label "Topic"@en ;
-    rdfs:comment "Тематска класификација на текстуален сегмент."@mk ;
-    rdfs:comment "Topic classification for a text segment."@en .
-
-vez:Извор a owl:Class ;
-    rdfs:label "Извор"@mk ;
-    rdfs:label "Source"@en ;
-    rdfs:comment "Минимална референца кон оригиналното снимање (наслов, дијалект). Не управува со аудио/видео."@mk ;
-    rdfs:comment "Minimal reference to the original recording (title, dialect). No audio/video management."@en .
+    rdfs:comment "Географска локација во која се зборува даден дијалект."@mk ;
+    rdfs:comment "Geographic location where a dialect is spoken."@en .
 
 # =============================================================
 # Object Properties — Dialect hierarchy
@@ -129,55 +82,6 @@ vez:hasDialect a owl:ObjectProperty ;
     rdfs:label "има дијалект"@mk ;
     rdfs:domain vez:ДијалектнаГрупа ;
     rdfs:range vez:Дијалект .
-
-# =============================================================
-# Object Properties — Content structure
-# =============================================================
-
-vez:fromSource a owl:ObjectProperty ;
-    rdfs:label "from source"@en ;
-    rdfs:label "од извор"@mk ;
-    rdfs:domain vez:ТекстуаленСегмент ;
-    rdfs:range vez:Извор .
-
-vez:inDialect a owl:ObjectProperty , owl:FunctionalProperty ;
-    rdfs:label "in dialect"@en ;
-    rdfs:label "на дијалект"@mk ;
-    rdfs:comment "Each text segment belongs to exactly one dialect."@en ;
-    rdfs:domain vez:ТекстуаленСегмент ;
-    rdfs:range vez:Дијалект .
-
-vez:containsSentence a owl:ObjectProperty ;
-    rdfs:label "contains sentence"@en ;
-    rdfs:label "содржи реченица"@mk ;
-    rdfs:domain vez:ТекстуаленСегмент ;
-    rdfs:range vez:Реченица ;
-    owl:inverseOf vez:sentenceOf .
-
-vez:sentenceOf a owl:ObjectProperty ;
-    rdfs:label "sentence of"@en ;
-    rdfs:label "реченица од"@mk ;
-    rdfs:domain vez:Реченица ;
-    rdfs:range vez:ТекстуаленСегмент .
-
-vez:containsLexeme a owl:ObjectProperty ;
-    rdfs:label "contains lexeme"@en ;
-    rdfs:label "содржи лексема"@mk ;
-    rdfs:domain vez:Реченица ;
-    rdfs:range vez:Лексема ;
-    owl:inverseOf vez:lexemeIn .
-
-vez:lexemeIn a owl:ObjectProperty ;
-    rdfs:label "lexeme in"@en ;
-    rdfs:label "лексема во"@mk ;
-    rdfs:domain vez:Лексема ;
-    rdfs:range vez:Реченица .
-
-vez:containsPhrase a owl:ObjectProperty ;
-    rdfs:label "contains phrase"@en ;
-    rdfs:label "содржи фраза"@mk ;
-    rdfs:domain vez:Реченица ;
-    rdfs:range vez:Фраза .
 
 # =============================================================
 # Object Properties — Dialect-linguistic links
@@ -197,27 +101,9 @@ vez:hasVariant a owl:ObjectProperty , owl:SymmetricProperty ;
     rdfs:domain vez:Лексема ;
     rdfs:range vez:Лексема .
 
-vez:phraseInDialect a owl:ObjectProperty ;
-    rdfs:label "phrase in dialect"@en ;
-    rdfs:label "фраза во дијалект"@mk ;
-    rdfs:domain vez:Фраза ;
-    rdfs:range vez:Дијалект .
-
 # =============================================================
-# Object Properties — Entity links
+# Object Properties — Dialect region
 # =============================================================
-
-vez:mentionsPlace a owl:ObjectProperty ;
-    rdfs:label "mentions place"@en ;
-    rdfs:label "споменува место"@mk ;
-    rdfs:domain vez:ТекстуаленСегмент ;
-    rdfs:range vez:Место .
-
-vez:mentionsPerson a owl:ObjectProperty ;
-    rdfs:label "mentions person"@en ;
-    rdfs:label "споменува лице"@mk ;
-    rdfs:domain vez:ТекстуаленСегмент ;
-    rdfs:range vez:Лице .
 
 vez:dialectRegion a owl:ObjectProperty ;
     rdfs:label "dialect region"@en ;
@@ -227,31 +113,8 @@ vez:dialectRegion a owl:ObjectProperty ;
     rdfs:range vez:Место .
 
 # =============================================================
-# Object Properties — Topic & Provenance
+# Datatype Properties — Lexeme content
 # =============================================================
-
-vez:hasTopic a owl:ObjectProperty ;
-    rdfs:label "has topic"@en ;
-    rdfs:label "има тема"@mk ;
-    rdfs:domain vez:ТекстуаленСегмент ;
-    rdfs:range vez:Тема .
-
-vez:attestedIn a owl:ObjectProperty ;
-    rdfs:label "attested in"@en ;
-    rdfs:label "потврдено во"@mk ;
-    rdfs:comment "Links a lexeme back to the text segment(s) where it was found."@en ;
-    rdfs:domain vez:Лексема ;
-    rdfs:range vez:ТекстуаленСегмент .
-
-# =============================================================
-# Datatype Properties — Text content
-# =============================================================
-
-vez:text a owl:DatatypeProperty ;
-    rdfs:label "text"@en ;
-    rdfs:label "текст"@mk ;
-    rdfs:comment "The actual transcribed text content in Cyrillic."@en ;
-    rdfs:range rdf:langString .
 
 vez:wordForm a owl:DatatypeProperty ;
     rdfs:label "word form"@en ;
@@ -260,23 +123,6 @@ vez:wordForm a owl:DatatypeProperty ;
     rdfs:domain vez:Лексема ;
     rdfs:range xsd:string .
 
-vez:lemma a owl:DatatypeProperty ;
-    rdfs:label "lemma"@en ;
-    rdfs:label "лема"@mk ;
-    rdfs:comment "Canonical dictionary form of the word."@en ;
-    rdfs:domain vez:Лексема ;
-    rdfs:range xsd:string .
-
-vez:phraseText a owl:DatatypeProperty ;
-    rdfs:label "phrase text"@en ;
-    rdfs:label "текст на фраза"@mk ;
-    rdfs:domain vez:Фраза ;
-    rdfs:range rdf:langString .
-
-# =============================================================
-# Datatype Properties — Statistics
-# =============================================================
-
 vez:frequency a owl:DatatypeProperty ;
     rdfs:label "frequency"@en ;
     rdfs:label "фреквенција"@mk ;
@@ -284,40 +130,9 @@ vez:frequency a owl:DatatypeProperty ;
     rdfs:domain vez:Лексема ;
     rdfs:range xsd:integer .
 
-vez:segmentIndex a owl:DatatypeProperty ;
-    rdfs:label "segment index"@en ;
-    rdfs:label "индекс на сегмент"@mk ;
-    rdfs:comment "Position of the segment within its source recording."@en ;
-    rdfs:domain vez:ТекстуаленСегмент ;
-    rdfs:range xsd:integer .
-
 # =============================================================
-# Datatype Properties — Metadata
+# Datatype Properties — Place metadata
 # =============================================================
-
-vez:sourceTitle a owl:DatatypeProperty ;
-    rdfs:label "source title"@en ;
-    rdfs:label "наслов на извор"@mk ;
-    rdfs:domain vez:Извор ;
-    rdfs:range xsd:string .
-
-vez:govor a owl:DatatypeProperty ;
-    rdfs:label "govor"@en ;
-    rdfs:label "говор"@mk ;
-    rdfs:comment "Raw dialect label from metadata.json govor field."@en ;
-    rdfs:domain vez:Извор ;
-    rdfs:range xsd:string .
-
-vez:languageCode a owl:DatatypeProperty ;
-    rdfs:label "language code"@en ;
-    rdfs:label "јазичен код"@mk ;
-    rdfs:range xsd:string .
-
-vez:personName a owl:DatatypeProperty ;
-    rdfs:label "person name"@en ;
-    rdfs:label "име на лице"@mk ;
-    rdfs:domain vez:Лице ;
-    rdfs:range xsd:string .
 
 vez:placeName a owl:DatatypeProperty ;
     rdfs:label "place name"@en ;

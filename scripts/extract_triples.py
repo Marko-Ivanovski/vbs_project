@@ -3,11 +3,9 @@ Vezilka Dialect Knowledge Graph — Triple Extraction Pipeline
 
 Reads the corpus at data/dijalekti/ and produces RDF triples:
   Phase A: Dialect hierarchy from folder structure (already in ontology, skip)
-  Phase B: Text segments from metadata.json
-  Phase C: Sentences from segments
-  Phase D: Lexemes (words) with dialect links and frequency
-  Phase E: Named entities (places, people) via pattern matching
-  Phase F: Cross-dialect variant proposals via fuzzy matching
+  Phase B: Tokenize transcripts, accumulate per-dialect word counts
+  Phase C: Lexemes (words) with dialect links and corpus frequency
+  Phase D: Cross-dialect variant pairs via sound-correspondence filtering
 
 Output: output/vezilka-data.ttl
 """
@@ -19,7 +17,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 from rdflib import Graph, Literal, Namespace, URIRef
-from rdflib.namespace import OWL, RDF, RDFS, SKOS, XSD
+from rdflib.namespace import OWL, RDF, SKOS, XSD
 
 VEZ = Namespace("http://example.org/vezilka/ontology#")
 VEZR = Namespace("http://example.org/vezilka/resource/")
@@ -42,20 +40,6 @@ GOVOR_TO_DIALECT = {
     "kichevsko_porechki": "kichevsko_porechki",
     "ohridski": "ohridski",
     "strushki": "strushki",
-}
-
-MK_PLACE_GAZETTEER = {
-    "Скопје", "Битола", "Охрид", "Прилеп", "Велес", "Куманово",
-    "Штип", "Кочани", "Гевгелија", "Струга", "Кичево", "Тетово",
-    "Струмица", "Кавадарци", "Неготино", "Валандово", "Кратово",
-    "Крива Паланка", "Дебар", "Свети Николе", "Преспа", "Ресен",
-    "Македонија", "Република Македонија", "Југославија",
-    "Србија", "Бугарија", "Грција", "Албанија", "Хрватска",
-    "Германија", "Словенија", "Босна", "Косово", "Црна Гора",
-    "Европа", "Америка", "Австралија",
-    "Мариово", "Пелагонија", "Повардарје", "Полог",
-    "Вардар", "Дојран", "Преспанско Езеро", "Охридско Езеро",
-    "Солун", "Београд", "Загреб", "Софија",
 }
 
 STOPWORDS_MK = {
@@ -87,41 +71,10 @@ def slugify(text: str) -> str:
     return text[:80]
 
 
-def split_sentences(text: str) -> list[str]:
-    parts = re.split(r"(?<=[.!?])\s+", text.strip())
-    sentences = []
-    for p in parts:
-        p = p.strip()
-        if len(p) > 2:
-            sentences.append(p)
-    if not sentences and text.strip():
-        sentences = [text.strip()]
-    return sentences
-
-
 def tokenize(text: str) -> list[str]:
     text = text.lower()
     tokens = re.findall(r"[а-яѓѕјљњќџёА-ЯЃЅЈЉЊЌЏЁ]+", text, re.IGNORECASE)
     return [t for t in tokens if len(t) > 1 and t not in STOPWORDS_MK]
-
-
-def find_places(text: str) -> set[str]:
-    found = set()
-    for place in MK_PLACE_GAZETTEER:
-        if place in text:
-            found.add(place)
-    return found
-
-
-def find_persons(text: str) -> set[str]:
-    found = set()
-    pattern = r"\b([А-ЯЃЅЈЉЊЌЏ][а-яѓѕјљњќџ]{2,})\s+([А-ЯЃЅЈЉЊЌЏ][а-яѓѕјљњќџ]{2,})\b"
-    for match in re.finditer(pattern, text):
-        first, last = match.group(1), match.group(2)
-        full = f"{first} {last}"
-        if first not in MK_PLACE_GAZETTEER and last not in MK_PLACE_GAZETTEER:
-            found.add(full)
-    return found
 
 
 def load_metadata_files() -> list[dict]:
@@ -174,71 +127,26 @@ def run_pipeline():
     schema_triples = len(g)
     print(f"  Schema loaded: {schema_triples} triples")
 
-    print("\nPhase B: Extracting text segments from metadata.json...")
+    print("\nPhase B: Tokenizing transcripts, counting words per dialect...")
     records = load_metadata_files()
     print(f"  Found {len(records)} video metadata files")
 
-    source_uris = {}
-    segment_count = 0
-    sentence_count = 0
     all_dialect_words: dict[str, Counter] = defaultdict(Counter)
-    all_places: set[str] = set()
-    all_persons: set[str] = set()
-    segment_entities: list[tuple] = []
+    segment_count = 0
 
     for rec in records:
-        dialect_uri = VEZR[rec["dialect_key"]]
-        source_slug = slugify(rec["video_title"])
-        source_uri = VEZR[f"source_{source_slug}"]
-
-        if source_uri not in source_uris:
-            g.add((source_uri, RDF.type, VEZ.Извор))
-            g.add((source_uri, VEZ.sourceTitle, Literal(rec["video_title"])))
-            g.add((source_uri, VEZ.govor, Literal(rec["govor"])))
-            source_uris[source_uri] = True
-
-        for i, seg in enumerate(rec["segments"]):
+        for seg in rec["segments"]:
             text = seg["text"].strip()
             if not text:
                 continue
-
-            seg_uri = VEZR[f"seg_{source_slug}_{i:04d}"]
-            g.add((seg_uri, RDF.type, VEZ.ТекстуаленСегмент))
-            g.add((seg_uri, VEZ.text, Literal(text, lang="mk")))
-            g.add((seg_uri, VEZ.inDialect, dialect_uri))
-            g.add((seg_uri, VEZ.fromSource, source_uri))
-            g.add((seg_uri, VEZ.segmentIndex, Literal(i, datatype=XSD.integer)))
             segment_count += 1
-
-            # Phase C: sentences
-            sentences = split_sentences(text)
-            for j, sent_text in enumerate(sentences):
-                sent_uri = VEZR[f"sent_{source_slug}_{i:04d}_{j:03d}"]
-                g.add((sent_uri, RDF.type, VEZ.Реченица))
-                g.add((sent_uri, VEZ.text, Literal(sent_text, lang="mk")))
-                g.add((seg_uri, VEZ.containsSentence, sent_uri))
-                g.add((sent_uri, VEZ.sentenceOf, seg_uri))
-                sentence_count += 1
-
-            # Phase D: words
-            words = tokenize(text)
-            word_counts = Counter(words)
-            for word, count in word_counts.items():
+            for word, count in Counter(tokenize(text)).items():
                 all_dialect_words[rec["dialect_key"]][word] += count
 
-            # Phase E: NER
-            places = find_places(text)
-            persons = find_persons(text)
-            all_places.update(places)
-            all_persons.update(persons)
-            if places or persons:
-                segment_entities.append((seg_uri, places, persons))
+    print(f"  Transcript segments scanned: {segment_count}")
 
-    print(f"  Segments: {segment_count}")
-    print(f"  Sentences: {sentence_count}")
-
-    # Phase D (cont): create Лексема instances
-    print("\nPhase D: Building lexeme instances...")
+    # Phase C: create Лексема instances
+    print("\nPhase C: Building lexeme instances...")
     global_word_freq: Counter = Counter()
     word_dialects: dict[str, set[str]] = defaultdict(set)
 
@@ -265,40 +173,8 @@ def run_pipeline():
     print(f"  Lexemes: {lexeme_count}")
     print(f"  Total word occurrences: {sum(global_word_freq.values())}")
 
-    # Phase E (cont): create entity instances
-    print("\nPhase E: Creating named entity instances...")
-    place_uris = {}
-    for place_name in sorted(all_places):
-        place_slug = slugify(place_name)
-        place_uri = VEZR[f"place_{place_slug}"]
-        if (place_uri, RDF.type, VEZ.Место) not in g:
-            g.add((place_uri, RDF.type, VEZ.Место))
-            g.add((place_uri, VEZ.placeName, Literal(place_name)))
-            g.add((place_uri, RDFS.label, Literal(place_name, lang="mk")))
-        place_uris[place_name] = place_uri
-
-    person_uris = {}
-    for person_name in sorted(all_persons):
-        person_slug = slugify(person_name)
-        person_uri = VEZR[f"person_{person_slug}"]
-        g.add((person_uri, RDF.type, VEZ.Лице))
-        g.add((person_uri, VEZ.personName, Literal(person_name)))
-        g.add((person_uri, RDFS.label, Literal(person_name, lang="mk")))
-        person_uris[person_name] = person_uri
-
-    for seg_uri, places, persons in segment_entities:
-        for p in places:
-            if p in place_uris:
-                g.add((seg_uri, VEZ.mentionsPlace, place_uris[p]))
-        for p in persons:
-            if p in person_uris:
-                g.add((seg_uri, VEZ.mentionsPerson, person_uris[p]))
-
-    print(f"  Places: {len(place_uris)}")
-    print(f"  Persons: {len(person_uris)}")
-
-    # Phase F: variant proposals
-    print("\nPhase F: Proposing cross-dialect variants...")
+    # Phase D: variant proposals
+    print("\nPhase D: Proposing cross-dialect variants...")
     variant_pairs = find_variant_candidates(all_dialect_words, global_word_freq)
     for w1, w2 in variant_pairs:
         uri1 = VEZR[f"lex_{slugify(w1)}"]
@@ -320,12 +196,9 @@ def run_pipeline():
         "data_triples": total_triples - schema_triples,
         "total_triples": total_triples,
         "videos": len(records),
-        "segments": segment_count,
-        "sentences": sentence_count,
+        "segments_scanned": segment_count,
         "lexemes": lexeme_count,
         "total_word_occurrences": sum(global_word_freq.values()),
-        "places": len(place_uris),
-        "persons": len(person_uris),
         "variant_pairs": len(variant_pairs),
         "dialects_with_data": len(all_dialect_words),
         "per_dialect_lexeme_counts": {
@@ -375,16 +248,15 @@ def edit_distance(s1: str, s2: str) -> int:
 
 # Allowed single-character substitutions (unordered).
 _VARIANT_SUB_PAIRS = {
-    frozenset(("е", "и")),   # eastern vowel reduction (е > и)
-    frozenset(("о", "у")),   # eastern vowel reduction (о > у)
-    frozenset(("а", "ъ")),   # schwa reflex
-    frozenset(("ќ", "ч")),   # palatal variation
+    frozenset(("е", "и")),
+    frozenset(("о", "у")),
+    frozenset(("ќ", "ч")),
     frozenset(("ѓ", "џ")),
     frozenset(("ѕ", "з")),
-    frozenset(("х", "в")),   # х-reflex
+    frozenset(("х", "в")),
     frozenset(("х", "ф")),
     frozenset(("в", "ф")),
-    frozenset(("л", "в")),   # л-vocalization (волк ~ вовк)
+    frozenset(("л", "в")),
     frozenset(("њ", "н")),
     frozenset(("љ", "л")),
 }

@@ -40,14 +40,8 @@ CLASS_LABELS = {
     "Наречје": "DialectArea",
     "ДијалектнаГрупа": "DialectGroup",
     "Дијалект": "Dialect",
-    "ТекстуаленСегмент": "Segment",
-    "Реченица": "Sentence",
     "Лексема": "Lexeme",
-    "Фраза": "Phrase",
     "Место": "Place",
-    "Лице": "Person",
-    "Тема": "Theme",
-    "Извор": "Source",
 }
 
 BATCH = 5000

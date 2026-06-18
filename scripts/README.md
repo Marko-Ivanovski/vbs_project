@@ -13,20 +13,19 @@ pip install -r requirements.txt
 
 ## extract_triples.py
 
-Главна скрипта за извлекување на тројки од `data/dijalekti/`. Поминува низ 6 фази:
+Главна скрипта за извлекување на тројки од `data/dijalekti/`. Поминува низ 3 фази
+(фаза A — дијалектната хиерархија — е веќе дефинирана во онтологијата):
 
 | Фаза | Опис | Излез |
 |------|------|-------|
-| B | Парсирање на `metadata.json` -> `ТекстуаленСегмент` тројки | Сегменти со `vez:inDialect`, `vez:text` |
-| C | Делење на сегменти во реченици | `Реченица` инстанци |
-| D | Токенизација -> `Лексема` инстанци | Зборови со `vez:appearsInDialect`, `vez:frequency` |
-| E | NER (gazetteer + regex) -> `Место`, `Лице` | Ентитети со `vez:mentionsPlace/Person` |
-| F | Fuzzy matching + дијалектен филтер -> `vez:hasVariant` парови | Cross-dialect варијанти |
+| B | Токенизација на транскриптите, броење зборови по дијалект | per-dialect word counts |
+| C | Градење `Лексема` инстанци | Зборови со `vez:appearsInDialect`, `vez:frequency` |
+| D | Sound-correspondence филтер -> `vez:hasVariant` парови | Cross-dialect варијанти |
 
 #### Филтер на варијанти (`is_dialectal_variant`)
 
 Fuzzy matching по edit distance сам по себе задржува лажни парови (сон↔сом, рак↔рок).
-Затоа фаза F прифаќа пар **само** ако зборовите се разликуваат по регуларни македонски
+Затоа фаза D прифаќа пар **само** ако зборовите се разликуваат по регуларни македонски
 дијалектни гласовни промени (е/и, о/у, ч/ќ, в/л вокализација, елизија на г/в/х/ј/т).
 Целосно автоматски, без рачна курација — намерно бира прецизност пред recall.
 Ефект: **11,792 → 111** парови.
@@ -42,13 +41,12 @@ python scripts/extract_triples.py
 Сите фајлови се генерираат во `output/`:
 
 - `vezilka-data.ttl` — RDF тројки (schema + data) во Turtle формат
-- `stats.json` — статистика за корпусот (број на тројки, лексеми, сегменти итн.)
+- `stats.json` — статистика за корпусот (број на тројки, лексеми, варијанти итн.)
 - `variants-review.csv` — филтрираните cross-dialect варијанти (111 парови)
 
 ### Конфигурација
 
 - `GOVOR_TO_DIALECT` — mapping од `govor` полето во `metadata.json` кон URI-то на дијалектот
-- `MK_PLACE_GAZETTEER` — листа на познати географски имиња за NER
 - `STOPWORDS_MK` — stopwords кои се исклучуваат од лексемите
 
 ## validate.py
@@ -78,14 +76,15 @@ python scripts/validate.py
 - literal properties → својства на јазол (`wordForm`, `frequency`, …)
 - object properties → врски (`APPEARS_IN_DIALECT`, `HAS_VARIANT`, …)
 
-Резултат: **73,270 јазли / 126,546 врски** (се вклопува во Aura Free лимитите 200k/400k).
+Резултат: **36,416 јазли / 52,649 врски** (36,368 лексеми + 36 јазли дијалектна хиерархија
++ 12 региони). Лесно се вклопува во Aura Free лимитите (200k/400k).
 
 ### Употреба
 
 ```bash
-cp .env.example .env      # внеси NEO4J_URI / NEO4J_USERNAME / NEO4J_PASSWORD
+cp .env.example .env
 python scripts/load_neo4j.py
-python scripts/load_neo4j.py --wipe   # избриши го постоечкиот граф пред вчитување
+python scripts/load_neo4j.py --wipe
 ```
 
 Credentials се читаат од gitignored `.env` (никогаш не се commit-ираат).
