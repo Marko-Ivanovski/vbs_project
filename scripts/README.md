@@ -1,7 +1,6 @@
 # Scripts
 
-Скрипти за извлекување на RDF тројки од корпусот, валидација на knowledge graph-от,
-и вчитување во Neo4j.
+Скрипти за извлекување на RDF тројки од корпусот, валидација на knowledge graph-от, и вчитување во Neo4j.
 
 ## Предуслови
 
@@ -87,4 +86,4 @@ python scripts/load_neo4j.py
 python scripts/load_neo4j.py --wipe
 ```
 
-Credentials се читаат од gitignored `.env` (никогаш не се commit-ираат).
+Credentials се читаат од gitignored `.env`.
