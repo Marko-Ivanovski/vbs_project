@@ -305,7 +305,7 @@ vezr:strushki a vez:Дијалект ;
     vez:dialectRegion vezr:place_struga .
 
 # =============================================================
-# Instances — Дијалекти without data (10 defined in hierarchy)
+# Instances — Дијалекти without data (12 defined in hierarchy)
 # =============================================================
 
 vezr:maleshevski a vez:Дијалект ;
